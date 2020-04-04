@@ -53,28 +53,37 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), REQUEST_STORAGE)
             return
         }
-        val fileUri = chooseFile()
-        if (fileUri == null) {
-            Toast.makeText(this, R.string.select_video_failed, Toast.LENGTH_SHORT).show()
-            return
-        }
-        try {
-            contentResolver.openFileDescriptor(fileUri, "r")!!.use {
+        chooseFile()
 
-            }
-        } catch (exception: Exception) {
-            Log.w(TAG, "open fd failed", exception)
-            Toast.makeText(this, R.string.open_video_failed, Toast.LENGTH_SHORT).show()
-            return
-        }
 
     }
 
-    private fun chooseFile(): Uri? {
+    private fun chooseFile() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = MIME_TYPE_VIDEO
         startActivityForResult(Intent.createChooser(intent, getString(R.string.select_video)), REQUEST_VIDEO_FILE)
-        return null
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_VIDEO_FILE) {
+            val fileUri = data!!.data
+
+            if (fileUri == null) {
+                Toast.makeText(this, R.string.select_video_failed, Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            try {
+                contentResolver.openFileDescriptor(fileUri, "r")!!.use {
+
+                }
+            } catch (exception: Exception) {
+                Log.w(TAG, "open fd failed", exception)
+                Toast.makeText(this, R.string.open_video_failed, Toast.LENGTH_SHORT).show()
+                return
+            }
+        }
     }
 
     companion object {
